@@ -1,0 +1,37 @@
+Aim: “Simulate an Ethernet LAN using N-nodes (6-10), change bandwidth and compare the
+throughput”
+TCL Code
+set ns [new Simulator]
+set trf [open prog5.tr w]
+$ns trace-all $trf
+set naf [open prog5.nam w]
+$ns namtrace-all $naf
+set n0 [$ns node]
+set n1 [$ns node]
+set n2 [$ns node]
+set n3 [$ns node]
+set n4 [$ns node]
+set n5 [$ns node]
+set n6 [$ns node]
+set n7 [$ns node]
+set lan [$ns newLan "$n0 $n1 $n2 $n3 $n4 $n5 $n6 $n7" 5Mb 10ms LL Queue/DropTail Channel]
+set tcp [new Agent/TCP]
+$ns attach-agent $n0 $tcp
+set ftp [new Application/FTP]
+$ftp attach-agent $tcp
+set sink [new Agent/TCPSink]
+$ns attach-agent $n7 $sink
+$ns connect $tcp $sink
+set udp [new Agent/UDP]
+$ns attach-agent $n1 $udp
+set cbr [new Application/Traffic/CBR]
+$cbr attach-agent $udp
+set null [new Agent/Null]
+$ns attach-agent $n5 $null
+$ns connect $udp $null
+proc finish {} {
+global ns naf trf
+$ns flush-trace
+exec nam prog5.nam &
+close $trf
+close $naf
